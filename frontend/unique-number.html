@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>주문 인증</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gradient-to-br from-purple-100 via-pink-100 to-orange-100 min-h-screen flex items-center justify-center">
+
+  <div class="bg-white p-10 rounded-2xl shadow-xl w-full max-w-md text-center">
+    <h1 class="text-3xl font-bold mb-6 text-purple-700">주문 인증</h1>
+    <p id="welcome" class="mb-4 text-gray-600">잠시만 기다려주세요...</p>
+
+    <form id="verifyForm" class="flex flex-col gap-4 hidden">
+      <input id="orderNumber" type="text" placeholder="주문번호를 입력하세요" class="px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-400">
+      <button type="submit" class="bg-purple-600 text-white px-6 py-3 rounded-xl hover:bg-purple-700 transition-all duration-200">
+        주문 검증
+      </button>
+    </form>
+
+    <p id="message" class="mt-4 text-center text-red-500"></p>
+  </div>
+
+  <script>
+    const API_BASE = "https://backend.luxeret.com/api";
+    const messageEl = document.getElementById('message');
+    const welcomeEl = document.getElementById('welcome');
+    const formEl = document.getElementById('verifyForm');
+
+    async function init() {
+      // auth=success 쿼리 제거
+      if (window.location.search.includes('auth=success')) {
+        const url = new URL(window.location.href);
+        url.searchParams.delete('auth');
+        window.history.replaceState({}, "", url.toString());
+      }
+
+      try {
+        // 로그인된 사용자 정보 확인
+        const res = await fetch(`${API_BASE}/auth/user`, { credentials: 'include' });
+        if (!res.ok) throw new Error('로그인이 필요합니다.');
+        const data = await res.json();
+        welcomeEl.textContent = `환영합니다, ${data.user.username}님!`;
+        formEl.classList.remove('hidden');
+      } catch (err) {
+        welcomeEl.textContent = '로그인이 필요합니다.';
+        messageEl.textContent = 'Discord 로그인 후 다시 시도해주세요.';
+      }
+    }
+
+    formEl.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      messageEl.textContent = '';
+
+      const orderNumber = document.getElementById('orderNumber').value.trim();
+      if (!orderNumber) return;
+
+      try {
+        // 디스코드 서버 가입 여부 확인
+        const memberRes = await fetch(`${API_BASE}/discord/member-status`, { credentials: 'include' });
+        const memberData = await memberRes.json();
+
+        if (!memberData.is_member) {
+          messageEl.textContent = '먼저 디스코드 서버에 가입해주세요!';
+          window.open(memberData.invite_url, '_blank');
+          return;
+        }
+
+        // 주문 검증
+        const verifyRes = await fetch(`${API_BASE}/orders/verify`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify({ order_number: orderNumber })
+        });
+
+        const result = await verifyRes.json();
+        if (result.status === 'success') {
+          messageEl.textContent = `✅ ${result.message}`;
+          messageEl.classList.remove('text-red-500');
+          messageEl.classList.add('text-green-600');
+          formEl.reset();
+        } else {
+          messageEl.textContent = `❌ ${result.message}`;
+          messageEl.classList.remove('text-green-600');
+          messageEl.classList.add('text-red-500');
+        }
+      } catch (err) {
+        console.error(err);
+        messageEl.textContent = '❌ 오류가 발생했습니다.';
+      }
+    });
+
+    init();
+  </script>
+</body>
+</html>
