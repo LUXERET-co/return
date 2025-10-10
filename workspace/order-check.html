@@ -31,10 +31,8 @@
     <form id="verifyForm" class="flex flex-col gap-4 hidden">
       <input id="orderNumber" type="text" placeholder="주문번호를 입력하세요" 
              class="px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-400">
-      
       <input id="orderDate" type="date" 
              class="px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-400">
-
       <button type="submit" 
               class="w-full bg-black text-white font-medium py-3 rounded-xl hover:bg-gray-800 transition-all duration-300 shadow-sm hover:shadow-md">
         확인하기
@@ -51,21 +49,23 @@
     const formEl = document.getElementById('verifyForm');
     const loginBtnWrapper = document.getElementById('loginBtnWrapper');
 
+    // 로그인 상태 확인 및 초기화
     async function init() {
-      // 로그인 확인
       try {
         const res = await fetch(`${API_BASE}/auth/user`, { credentials: 'include' });
         if (!res.ok) throw new Error('로그인이 필요합니다.');
         const data = await res.json();
         welcomeEl.textContent = `${data.user.username}님, 환영합니다!`;
         formEl.classList.remove('hidden');
+        loginBtnWrapper.classList.add('hidden');
       } catch (err) {
         welcomeEl.textContent = '로그인이 필요합니다.';
-        messageEl.textContent = 'Discord 로그인 후 다시 이용해주세요.';
+        messageEl.textContent = 'Discord 로그인 후 이용해주세요.';
         loginBtnWrapper.classList.remove('hidden');
       }
     }
 
+    // 주문 검증 처리
     formEl.addEventListener('submit', async (e) => {
       e.preventDefault();
       messageEl.textContent = '';
@@ -79,6 +79,8 @@
         messageEl.classList.add('text-red-500');
         return;
       }
+
+      const [order_year, order_month, order_day] = orderDate.split('-').map(Number);
 
       try {
         // 디스코드 서버 가입 확인
@@ -99,23 +101,44 @@
           credentials: 'include',
           body: JSON.stringify({
             order_number: orderNumber,
-            order_date: orderDate
+            order_year,
+            order_month,
+            order_day
           })
         });
 
         const result = await verifyRes.json();
 
         if (result.status === 'success') {
-          messageEl.textContent = '인증 성공! 곧 디스코드 서버로 이동합니다...';
+          messageEl.textContent = '구매 인증 성공! 디스코드 서버로 이동합니다.';
           messageEl.classList.add('text-green-600');
-          formEl.reset();
-
-          // 1초 후 디스코드 서버로 자동 이동
           setTimeout(() => {
-            window.location.href = "https://discord.gg/YOUR_SERVER_INVITE"; // 서버 링크 변경
-          }, 1000);
+            window.location.href = "https://discord.gg/MuJx4UKD"; // 실제 서버 링크로 변경
+          }, 1500);
         } else {
-          messageEl.textContent = result.message || '인증에 실패했습니다.';
+          // 사용자 친화적 오류 메시지
+          let errorMsg = '';
+          switch(result.code) {
+            case 'ORDER_NOT_FOUND':
+              errorMsg = '주문번호가 올바르지 않거나, 입력하신 날짜에 구매 내역이 없습니다.';
+              break;
+            case 'NOT_MEMBER':
+              errorMsg = '디스코드 서버에 가입되어 있지 않습니다.';
+              if (result.invite_url) window.open(result.invite_url, '_blank');
+              break;
+            case 'ROLE_ASSIGNMENT_FAILED':
+              errorMsg = '인증은 되었지만 역할 지급에 실패했습니다. 관리자에게 문의하세요.';
+              break;
+            case 'INVALID_ORDER_NUMBER':
+              errorMsg = '주문번호 형식이 올바르지 않습니다.';
+              break;
+            case 'INVALID_DATE':
+              errorMsg = '입력하신 구매일이 정확하지 않습니다.';
+              break;
+            default:
+              errorMsg = '알 수 없는 오류가 발생했습니다. 잠시 후 다시 시도해주세요.';
+          }
+          messageEl.textContent = errorMsg;
           messageEl.classList.add('text-red-500');
         }
 
