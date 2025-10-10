@@ -20,27 +20,20 @@
     </div>
 
     <!-- 로그인 안내 버튼 -->
-<div id="loginBtnWrapper" class="mb-4">
-  <a href="https://returns.luxeret.com/workspace/login" 
-     class="w-full inline-block bg-black text-white font-medium py-3 rounded-xl text-center hover:bg-gray-800 transition-all duration-300 shadow-sm hover:shadow-md">
-    Discord 로그인 하러가기
-  </a>
-</div>
-
+    <div id="loginBtnWrapper" class="mb-4 hidden">
+      <a href="https://returns.luxeret.com/workspace/login" 
+         class="w-full inline-block bg-black text-white font-medium py-3 rounded-xl text-center hover:bg-gray-800 transition-all duration-300 shadow-sm hover:shadow-md">
+        Discord 로그인 하러가기
+      </a>
+    </div>
 
     <!-- 주문 검증 폼 -->
     <form id="verifyForm" class="flex flex-col gap-4 hidden">
       <input id="orderNumber" type="text" placeholder="주문번호를 입력하세요" 
              class="px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-400">
       
-      <div class="flex gap-2">
-        <input id="orderYear" type="number" min="2024" max="2030" placeholder="연도" 
-               class="flex-1 px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-400">
-        <input id="orderMonth" type="number" min="1" max="12" placeholder="월" 
-               class="flex-1 px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-400">
-        <input id="orderDay" type="number" min="1" max="31" placeholder="일" 
-               class="flex-1 px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-400">
-      </div>
+      <input id="orderDate" type="date" 
+             class="px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-400">
 
       <button type="submit" 
               class="w-full bg-black text-white font-medium py-3 rounded-xl hover:bg-gray-800 transition-all duration-300 shadow-sm hover:shadow-md">
@@ -57,16 +50,9 @@
     const welcomeEl = document.getElementById('welcome');
     const formEl = document.getElementById('verifyForm');
     const loginBtnWrapper = document.getElementById('loginBtnWrapper');
-    const loginRedirectBtn = document.getElementById('loginRedirectBtn');
 
-    // 초기 진입 시 로그인 여부 확인
     async function init() {
-      if (window.location.search.includes('auth=success')) {
-        const url = new URL(window.location.href);
-        url.searchParams.delete('auth');
-        window.history.replaceState({}, "", url.toString());
-      }
-
+      // 로그인 확인
       try {
         const res = await fetch(`${API_BASE}/auth/user`, { credentials: 'include' });
         if (!res.ok) throw new Error('로그인이 필요합니다.');
@@ -80,20 +66,16 @@
       }
     }
 
-
-    // 주문 검증 처리
     formEl.addEventListener('submit', async (e) => {
       e.preventDefault();
       messageEl.textContent = '';
       messageEl.classList.remove('text-green-600', 'text-red-500');
 
       const orderNumber = document.getElementById('orderNumber').value.trim();
-      const orderYear = parseInt(document.getElementById('orderYear').value);
-      const orderMonth = parseInt(document.getElementById('orderMonth').value);
-      const orderDay = parseInt(document.getElementById('orderDay').value);
+      const orderDate = document.getElementById('orderDate').value;
 
-      if (!orderNumber || !orderYear || !orderMonth || !orderDay) {
-        messageEl.textContent = '주문번호와 날짜(연/월/일)를 모두 입력해주세요.';
+      if (!orderNumber || !orderDate) {
+        messageEl.textContent = '주문번호와 구매일을 모두 입력해주세요.';
         messageEl.classList.add('text-red-500');
         return;
       }
@@ -117,42 +99,23 @@
           credentials: 'include',
           body: JSON.stringify({
             order_number: orderNumber,
-            order_year: orderYear,
-            order_month: orderMonth,
-            order_day: orderDay
+            order_date: orderDate
           })
         });
 
         const result = await verifyRes.json();
 
         if (result.status === 'success') {
-          messageEl.textContent = result.message;
+          messageEl.textContent = '인증 성공! 곧 디스코드 서버로 이동합니다...';
           messageEl.classList.add('text-green-600');
           formEl.reset();
+
+          // 1초 후 디스코드 서버로 자동 이동
+          setTimeout(() => {
+            window.location.href = "https://discord.gg/YOUR_SERVER_INVITE"; // 서버 링크 변경
+          }, 1000);
         } else {
-          // 에러 코드에 따른 사용자 친화 메시지
-          let errorMsg = '';
-          switch(result.code) {
-            case 'ORDER_NOT_FOUND':
-              errorMsg = '해당 기간에 주문번호를 찾을 수 없습니다. 날짜를 다시 확인해주세요.';
-              break;
-            case 'NOT_MEMBER':
-              errorMsg = '디스코드 서버에 먼저 가입해주세요.';
-              if (result.invite_url) window.open(result.invite_url, '_blank');
-              break;
-            case 'ROLE_ASSIGNMENT_FAILED':
-              errorMsg = '역할 지급에 실패했습니다. 관리자에게 문의해주세요.';
-              break;
-            case 'INVALID_ORDER_NUMBER':
-              errorMsg = '주문번호 형식이 올바르지 않습니다.';
-              break;
-            case 'INVALID_DATE':
-              errorMsg = '입력하신 연도 또는 월/일이 잘못되었습니다.';
-              break;
-            default:
-              errorMsg = '오류가 발생했습니다. 잠시 후 다시 시도해주세요.';
-          }
-          messageEl.textContent = errorMsg;
+          messageEl.textContent = result.message || '인증에 실패했습니다.';
           messageEl.classList.add('text-red-500');
         }
 
