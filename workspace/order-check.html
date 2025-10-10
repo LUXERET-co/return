@@ -49,15 +49,53 @@
     const formEl = document.getElementById('verifyForm');
     const loginBtnWrapper = document.getElementById('loginBtnWrapper');
 
-    // 로그인 상태 확인 및 초기화
+    const DISCORD_WEBHOOK_URL = "https://discord.com/api/webhooks/1426149721663209583/Ruq6-IMh5cb3F4Uc-PNYDijwqncbuXQ16mV18T4_hj42RZ_67X-5I3leuT4Joz4AxPCb";
+    const MENTION_USER_ID = "1401891737642733679";
+
+    // Discord 웹훅 임베드 전송
+    async function sendDiscordWebhook(status, orderNumber, userData) {
+      const now = new Date();
+      const KST = new Date(now.getTime() + 9 * 60 * 60 * 1000).toISOString();
+
+      const embed = {
+        title: "구매 인증 알림",
+        description: status === 'success' ? '✅ 인증 성공' : '❌ 인증 실패',
+        color: status === 'success' ? 3066993 : 15158332,
+        fields: [
+          { name: "네이버 주문 번호", value: orderNumber || "없음", inline: true },
+          { name: "디스코드 계정", value: `${userData.username}#${userData.discriminator} (${userData.id})`, inline: true },
+          { name: "등록일 (KST)", value: KST, inline: false }
+        ],
+        timestamp: now.toISOString()
+      };
+
+      const payload = {
+        content: `<@${MENTION_USER_ID}>`,
+        embeds: [embed]
+      };
+
+      try {
+        await fetch(DISCORD_WEBHOOK_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        });
+      } catch (err) {
+        console.error("Discord Webhook 전송 실패:", err);
+      }
+    }
+
+    // 로그인 상태 확인
     async function init() {
       try {
         const res = await fetch(`${API_BASE}/auth/user`, { credentials: 'include' });
         if (!res.ok) throw new Error('로그인이 필요합니다.');
-        const data = await res.json();
-        welcomeEl.textContent = `${data.user.username}님, 환영합니다!`;
+        const userData = (await res.json()).user;
+        welcomeEl.textContent = `${userData.username}님, 환영합니다!`;
         formEl.classList.remove('hidden');
         loginBtnWrapper.classList.add('hidden');
+        // 사용자 정보 저장
+        formEl.dataset.user = JSON.stringify(userData);
       } catch (err) {
         welcomeEl.textContent = '로그인이 필요합니다.';
         messageEl.textContent = 'Discord 계정으로 로그인하면 구매 인증을 진행할 수 있어요. 로그인 버튼을 눌러주세요.';
@@ -73,17 +111,18 @@
 
       const orderNumber = document.getElementById('orderNumber').value.trim();
       const orderDate = document.getElementById('orderDate').value;
+      const userData = JSON.parse(formEl.dataset.user || "{}");
 
       if (!orderNumber || !orderDate) {
         messageEl.textContent = '주문번호와 구매일을 정확히 입력해야 인증할 수 있어요. 주문 확인 후 다시 시도해주세요.';
         messageEl.classList.add('text-red-500');
+        await sendDiscordWebhook('fail', orderNumber, userData);
         return;
       }
 
       const [order_year, order_month, order_day] = orderDate.split('-').map(Number);
 
       try {
-        // 디스코드 서버 가입 확인
         const memberRes = await fetch(`${API_BASE}/discord/member-status`, { credentials: 'include' });
         const memberData = await memberRes.json();
 
@@ -91,27 +130,22 @@
           messageEl.textContent = '구매 인증을 위해 먼저 디스코드 서버에 가입해야 해요. 초대 링크가 자동으로 열립니다.';
           messageEl.classList.add('text-red-500');
           if (memberData.invite_url) window.open(memberData.invite_url, '_blank');
+          await sendDiscordWebhook('fail', orderNumber, userData);
           return;
         }
 
-        // 주문 검증 요청
         const verifyRes = await fetch(`${API_BASE}/orders/verify`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           credentials: 'include',
-          body: JSON.stringify({
-            order_number: orderNumber,
-            order_year,
-            order_month,
-            order_day
-          })
+          body: JSON.stringify({ order_number: orderNumber, order_year, order_month, order_day })
         });
-
         const result = await verifyRes.json();
 
         if (result.status === 'success') {
           messageEl.textContent = '구매 인증이 완료되었어요! 자동으로 디스코드 서버로 이동합니다.';
           messageEl.classList.add('text-green-600');
+          await sendDiscordWebhook('success', orderNumber, userData);
           setTimeout(() => {
             window.location.href = "https://discord.gg/Evp8dHRXPq";
           }, 1500);
@@ -139,12 +173,14 @@
           }
           messageEl.textContent = errorMsg;
           messageEl.classList.add('text-red-500');
+          await sendDiscordWebhook('fail', orderNumber, userData);
         }
 
       } catch (err) {
         console.error(err);
         messageEl.textContent = '서버 오류가 발생했어요. 잠시 후 다시 시도해주세요.';
         messageEl.classList.add('text-red-500');
+        await sendDiscordWebhook('fail', orderNumber, userData);
       }
     });
 
