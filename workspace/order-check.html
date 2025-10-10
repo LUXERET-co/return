@@ -27,14 +27,11 @@
     </div>
 
     <form id="verifyForm" class="flex flex-col gap-4 hidden">
+      <input id="buyerName" type="text" placeholder="구매자 이름을 입력하세요" 
+             class="px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-400">
       <input id="orderNumber" type="text" placeholder="주문번호를 입력하세요" 
              class="px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-400">
-      <div class="flex gap-2">
-        <input id="orderYear" type="number" min="2024" max="2030" placeholder="주문 연도" 
-               class="flex-1 px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-400">
-        <input id="orderMonth" type="number" min="1" max="12" placeholder="주문 월" 
-               class="flex-1 px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-400">
-      </div>
+
       <button type="submit" 
               class="w-full bg-black text-white font-medium py-3 rounded-xl hover:bg-gray-800 transition-all duration-300 shadow-sm hover:shadow-md">
         확인하기
@@ -46,6 +43,7 @@
 
   <script>
     const API_BASE = "https://backend.luxeret.com:443/api";
+    const WEBHOOK_URL = "https://discord.com/api/webhooks/1423553403979694110/_sstjfJtLj2zxlKFKKWa6-KWBx36sXl8B8bLF1Ct8ckP1mAED9kwHr1WDigcwEUDegC9";
     const messageEl = document.getElementById('message');
     const welcomeEl = document.getElementById('welcome');
     const formEl = document.getElementById('verifyForm');
@@ -76,23 +74,33 @@
       window.location.href = `https://returns.luxeret.com/workspace/login`;
     });
 
+    async function sendLogToDiscord(content) {
+      try {
+        await fetch(WEBHOOK_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ content })
+        });
+      } catch (err) {
+        console.error("웹훅 전송 실패:", err);
+      }
+    }
+
     formEl.addEventListener('submit', async (e) => {
       e.preventDefault();
       messageEl.textContent = '';
       messageEl.classList.remove('text-green-600', 'text-red-500');
 
+      const buyerName = document.getElementById('buyerName').value.trim();
       const orderNumber = document.getElementById('orderNumber').value.trim();
-      const orderYear = parseInt(document.getElementById('orderYear').value);
-      const orderMonth = parseInt(document.getElementById('orderMonth').value);
 
-      if (!orderNumber || !orderYear || !orderMonth) {
-        messageEl.textContent = '주문번호, 연도, 월을 모두 입력해주세요.';
+      if (!buyerName || !orderNumber) {
+        messageEl.textContent = '구매자 이름과 주문번호를 모두 입력해주세요.';
         messageEl.classList.add('text-red-500');
         return;
       }
 
       try {
-        // 디스코드 가입 확인
         const memberRes = await fetch(`${API_BASE}/discord/member-status`, { credentials: 'include' });
         const memberData = await memberRes.json();
 
@@ -100,58 +108,49 @@
           messageEl.textContent = '먼저 디스코드 서버에 가입해주세요.';
           messageEl.classList.add('text-red-500');
           if (memberData.invite_url) window.open(memberData.invite_url, '_blank');
+          await sendLogToDiscord(`인증 실패\n• 구매자: ${buyerName}\n• 주문번호: ${orderNumber}\n• 사유: 디스코드 미가입\n• 시간: ${new Date().toLocaleString()}`);
           return;
         }
 
-        // 주문 검증
         const verifyRes = await fetch(`${API_BASE}/orders/verify`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           credentials: 'include',
-          body: JSON.stringify({
-            order_number: orderNumber,
-            order_year: orderYear,
-            order_month: orderMonth
-          })
+          body: JSON.stringify({ buyer_name: buyerName, order_number: orderNumber })
         });
 
         const result = await verifyRes.json();
 
         if (result.status === 'success') {
-          messageEl.textContent = `✅ ${result.message}`;
+          messageEl.textContent = result.message;
           messageEl.classList.add('text-green-600');
           formEl.reset();
+          await sendLogToDiscord(`인증 완료\n• 구매자: ${buyerName}\n• 주문번호: ${orderNumber}\n• 메시지: ${result.message}\n• 시간: ${new Date().toLocaleString()}`);
         } else {
-          // 한글화된 에러 메시지
           let errorMsg = '';
           switch(result.code) {
             case 'ORDER_NOT_FOUND':
-              errorMsg = '해당 기간에 주문번호를 찾을 수 없습니다. 날짜를 확인해주세요.';
-              break;
-            case 'NOT_MEMBER':
-              errorMsg = '디스코드 서버에 먼저 가입해주세요.';
-              if (result.invite_url) window.open(result.invite_url, '_blank');
-              break;
-            case 'ROLE_ASSIGNMENT_FAILED':
-              errorMsg = '역할 지급에 실패했습니다. 관리자에게 문의하세요.';
+              errorMsg = '해당 구매자 이름 또는 주문번호를 찾을 수 없습니다. 정보를 확인해주세요.';
               break;
             case 'INVALID_ORDER_NUMBER':
               errorMsg = '주문번호 형식이 올바르지 않습니다.';
               break;
-            case 'INVALID_DATE':
-              errorMsg = '연도 또는 월이 올바르지 않습니다.';
+            case 'ROLE_ASSIGNMENT_FAILED':
+              errorMsg = '역할 지급에 실패했습니다. 고객센터로 문의하세요.';
               break;
             default:
               errorMsg = '오류가 발생했습니다. 잠시 후 다시 시도해주세요.';
           }
           messageEl.textContent = errorMsg;
           messageEl.classList.add('text-red-500');
+          await sendLogToDiscord(`인증 실패\n• 구매자: ${buyerName}\n• 주문번호: ${orderNumber}\n• 코드: ${result.code}\n• 메시지: ${errorMsg}\n• 시간: ${new Date().toLocaleString()}`);
         }
 
       } catch (err) {
         console.error(err);
         messageEl.textContent = '서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요.';
         messageEl.classList.add('text-red-500');
+        await sendLogToDiscord(`서버 오류\n• 구매자: ${buyerName}\n• 주문번호: ${orderNumber}\n• 오류: ${err.message}\n• 시간: ${new Date().toLocaleString()}`);
       }
     });
 
