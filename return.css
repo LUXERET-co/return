@@ -1,43 +1,82 @@
 @font-face {
-  font-family: 'Pretendard-Regular';
-  src: url('https://fastly.jsdelivr.net/gh/Project-Noonnu/noonfonts_2107@1.1/Pretendard-Regular.woff') format('woff');
-  font-weight: 300;
-  font-style: normal;
+    font-family: 'Pretendard';
+    font-weight: 900;
+    font-display: swap;
+    src: local('Pretendard Black'),
+         url('/assets/fonts/woff2/Pretendard-Black.woff2') format('woff2'),
+         url('/assets/fonts/woff/Pretendard-Black.woff') format('woff');
 }
 
 @font-face {
-  font-family: 'Pretendard-Medium';
-  src: url('https://fastly.jsdelivr.net/gh/Project-Noonnu/noonfonts_2107@1.1/Pretendard-Medium.woff') format('woff');
-  font-weight: 400;
-  font-style: normal;
+    font-family: 'Pretendard';
+    font-weight: 800;
+    font-display: swap;
+    src: local('Pretendard ExtraBold'),
+         url('/assets/fonts/woff2/Pretendard-ExtraBold.woff2') format('woff2'),
+         url('/assets/fonts/woff/Pretendard-ExtraBold.woff') format('woff');
 }
 
 @font-face {
-  font-family: 'Pretendard-Light';
-  src: url('https://fastly.jsdelivr.net/gh/Project-Noonnu/noonfonts_2107@1.1/Pretendard-Light.woff') format('woff');
-  font-weight: 500;
-  font-style: normal;
+    font-family: 'Pretendard';
+    font-weight: 700;
+    font-display: swap;
+    src: local('Pretendard Bold'),
+         url('/assets/fonts/woff2/Pretendard-Bold.woff2') format('woff2'),
+         url('/assets/fonts/woff/Pretendard-Bold.woff') format('woff');
 }
 
 @font-face {
-  font-family: 'Pretendard-ExtraLight';
-  src: url('https://fastly.jsdelivr.net/gh/Project-Noonnu/noonfonts_2107@1.1/Pretendard-ExtraLight.woff') format('woff');
-  font-weight: 600;
-  font-style: normal;
+    font-family: 'Pretendard';
+    font-weight: 600;
+    font-display: swap;
+    src: local('Pretendard SemiBold'),
+         url('/assets/fonts/woff2/Pretendard-SemiBold.woff2') format('woff2'),
+         url('/assets/fonts/woff/Pretendard-SemiBold.woff') format('woff');
 }
 
 @font-face {
-  font-family: 'Pretendard-Bold';
-  src: url('https://fastly.jsdelivr.net/gh/Project-Noonnu/noonfonts_2107@1.1/Pretendard-Bold.woff') format('woff');
-  font-weight: 700;
-  font-style: normal;
+    font-family: 'Pretendard';
+    font-weight: 500;
+    font-display: swap;
+    src: local('Pretendard Medium'),
+         url('/assets/fonts/woff2/Pretendard-Medium.woff2') format('woff2'),
+         url('/assets/fonts/woff/Pretendard-Medium.woff') format('woff');
 }
 
 @font-face {
-  font-family: 'Pretendard-ExtraBold';
-  src: url('https://fastly.jsdelivr.net/gh/Project-Noonnu/noonfonts_2107@1.1/Pretendard-ExtraBold.woff') format('woff');
-  font-weight: 800;
-  font-style: normal;
+    font-family: 'Pretendard';
+    font-weight: 400;
+    font-display: swap;
+    src: local('Pretendard Regular'),
+         url('/assets/fonts/woff2/Pretendard-Regular.woff2') format('woff2'),
+         url('/assets/fonts/woff/Pretendard-Regular.woff') format('woff');
+}
+
+@font-face {
+    font-family: 'Pretendard';
+    font-weight: 300;
+    font-display: swap;
+    src: local('Pretendard Light'),
+         url('/assets/fonts/woff2/Pretendard-Light.woff2') format('woff2'),
+         url('/assets/fonts/woff/Pretendard-Light.woff') format('woff');
+}
+
+@font-face {
+    font-family: 'Pretendard';
+    font-weight: 200;
+    font-display: swap;
+    src: local('Pretendard ExtraLight'),
+         url('/assets/fonts/woff2/Pretendard-ExtraLight.woff2') format('woff2'),
+         url('/assets/fonts/woff/Pretendard-ExtraLight.woff') format('woff');
+}
+
+@font-face {
+    font-family: 'Pretendard';
+    font-weight: 100;
+    font-display: swap;
+    src: local('Pretendard Thin'),
+         url('/assets/fonts/woff2/Pretendard-Thin.woff2') format('woff2'),
+         url('/assets/fonts/woff/Pretendard-Thin.woff') format('woff');
 }
 
 
@@ -49,7 +88,8 @@
 html {
     -webkit-text-size-adjust: 100%;
     -ms-text-size-adjust: 100%;
-    font-family: Pretendard-Medium;
+    font-family: Pretendard;
+    font-weight: 400;
   }
   
   body {
@@ -234,7 +274,8 @@ html {
     background-color: #fff;
     min-height: 100%;
     margin: 0;
-    font-family: Arial, Pretendard-Medium;
+    font-family: Pretendard;
+    font-weight: 400;
     font-size: 14px;
     line-height: 20px;
   }
@@ -1391,7 +1432,8 @@ html {
     -webkit-tap-highlight-color: transparent;
     background: #000000e6;
     outline: 0;
-    font-family: Helvetica Neue, Helvetica, Ubuntu, Segoe UI, Verdana, Pretendard-Medium;
+    font-family: Helvetica Neue, Helvetica, Ubuntu, Segoe UI, Verdana, Pretendard;
+    font-weight: 400;
     font-size: 17px;
     font-style: normal;
     font-weight: 300;
@@ -2178,7 +2220,8 @@ html {
     --dark-color-palette--dark-950: var(--colors--dark);
     --utility-colors--dark-fade-2: #0a080c1a;
     --utility-colors--dark-fade-3: #0a080c0f;
-    --font--primary-family: Inter, Pretendard-Medium;
+    --font--primary-family: Inter, Pretendard;
+    --font-weight: 400;
     --font--medium-weight: 500;
     --letter-spacing--tight: -.03em;
     --letter-spacing--normal: 0em;
@@ -2310,7 +2353,7 @@ html {
   }
   
   body {
-    background-color: var(--background--background-primary);
+    background-color: #161418; 
     font-family: var(--text-main--font-family);
     color: var(--text--text-primary);
     font-size: var(--text-main--font-size-desktop);
@@ -3263,7 +3306,8 @@ html {
     max-width: 22ch;
     margin-top: 0;
     margin-bottom: 0;
-    font-family: Pretendard-Bold;
+    font-family: Pretendard;
+    font-weight: 600;
   }
   
   .section-header-text {
@@ -4091,7 +4135,8 @@ html {
       margin-top: 0;
       margin-bottom: 0;
       font-size: 22px;
-      font-family: Pretendard-Bold;
+      font-family: Pretendard;
+      font-weight: 600;
     }
     .section-header-text.text-style-large {
       margin-top: 0;
@@ -4514,7 +4559,8 @@ html {
       margin-top: 0;
       margin-bottom: 0;
       font-size: 22px;
-      font-family: Pretendard-Bold;
+      font-family: Pretendard;
+      font-weight: 600;
     }
 
     .section-header-text.text-style-large {
@@ -4613,3 +4659,97 @@ html {
     }
   }
 
+ .partner-slider-wrapper {
+       background-color: #161418;
+  }
+
+    .main-title {
+        text-align: center;
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin-top: 70px;
+        margin-bottom: 10px;
+        color: #ffffff;
+        background-color: #161418; 
+    }
+    .partner-slider-wrapper {
+        padding: 50px 0 130px 0;
+        overflow: hidden;
+    }
+
+    .partner-slider-container {
+        overflow: hidden;
+        position: relative;
+    }
+
+    .partner-slider-track {
+        display: flex;
+        animation: partnerScroll 20s linear infinite;
+    }
+
+    .partner-slider-track:hover {
+        animation-play-state: paused;
+    }
+
+    .partner-item {
+        flex: 0 0 auto;
+        margin: 0 20px;
+    }
+
+    .partner-link {
+        display: block;
+        width: 200px;
+        height: 120px;
+        background: #fafafa;
+        border-radius: 14px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-decoration: none;
+        border: 2px solid #dcdcdc;
+        transition: 0.25s ease;
+        overflow: hidden;
+    }
+
+    .partner-link:hover {
+        background: #f1f1f1;
+        border-color: #333;
+        box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+    }
+
+    .partner-logo {
+    max-width: 180px;
+    max-height: 120px;
+}
+
+
+    .partner-name {
+        font-size: 1.2rem;
+        font-weight: bold;
+        color: #444;
+        text-align: center;
+    }
+
+    @keyframes partnerScroll {
+        0% { transform: translateX(0); }
+        100% { transform: translateX(-50%); }
+    }
+
+    @media (max-width: 768px) {
+        .partner-link {
+            width: 150px;
+            height: 90px;
+        }
+
+        .partner-logo {
+            max-width: 100px;
+            max-height: 90px;
+        }
+
+        .partner-name {
+            font-size: 1rem;
+        }
+        .main-title {
+            font-size: 1.3rem;
+        } 
+    }
