@@ -189,6 +189,76 @@
                 </div>
             </section>
 
+
+        <div class="main-title">파트너와 함께 만드는 더 나은 경험, 리턴</div>
+    <div class="partner-slider-wrapper">
+        <div class="partner-slider-container">
+            <div class="partner-slider-track" id="partnerSliderTrack">
+            </div>
+        </div>
+    </div>
+
+
+    <script>
+        const partners = [
+            { name: '모노에그', url: 'https://www.monoegg.com/bbk/introduce_of_bbk.html', logo: 'https://luxeret.com/assets/image/partners-monoegg.png' },
+            { name: '룩세렛', url: 'https://luxeret.com/', logo: 'https://luxeret.com/assets/image/partners-luxeret.png' },
+            { name: '웹핀', url: 'https://webpin.luxeret.com/', logo: 'https://luxeret.com/assets/image/partners-webpin.png' },
+            { name: '모노에그', url: 'https://www.monoegg.com/bbk/introduce_of_bbk.html', logo: 'https://luxeret.com/assets/image/partners-monoegg.png' },
+            { name: '룩세렛', url: 'https://luxeret.com/', logo: 'https://luxeret.com/assets/image/partners-luxeret.png' },
+            { name: '웹핀', url: 'https://webpin.luxeret.com/', logo: 'https://luxeret.com/assets/image/partners-webpin.png' },
+        ];
+
+        function createPartnerElement(partner) {
+            const div = document.createElement('div');
+            div.className = 'partner-item';
+            
+            const link = document.createElement('a');
+            link.className = 'partner-link';
+            link.href = partner.url;
+            link.target = '_blank';
+            link.rel = 'noopener noreferrer';
+            
+            if (partner.logo) {
+                const img = document.createElement('img');
+                img.className = 'partner-logo';
+                img.src = partner.logo;
+                img.alt = partner.name;
+                img.onerror = function() {
+                    this.style.display = 'none';
+                    const span = document.createElement('span');
+                    span.className = 'partner-name';
+                    span.textContent = partner.name;
+                    link.appendChild(span);
+                };
+                link.appendChild(img);
+            } else {
+                const span = document.createElement('span');
+                span.className = 'partner-name';
+                span.textContent = partner.name;
+                link.appendChild(span);
+            }
+            
+            div.appendChild(link);
+            return div;
+        }
+
+        function initPartnerSlider() {
+            const track = document.getElementById('partnerSliderTrack');
+            
+            partners.forEach(partner => {
+                track.appendChild(createPartnerElement(partner));
+            });
+
+            partners.forEach(partner => {
+                track.appendChild(createPartnerElement(partner));
+            });
+        }
+
+        initPartnerSlider();
+    </script>
+
+
 <section class="youtube-section">
   <div class="container">
     <h2 class="section-title">
@@ -472,7 +542,7 @@
             </div>
         </footer>
 
-        <script>
+<script>
 (function(){var w=window;if(w.ChannelIO){return w.console.error("ChannelIO script included twice.");}var ch=function(){ch.c(arguments);};ch.q=[];ch.c=function(args){ch.q.push(args);};w.ChannelIO=ch;function l(){if(w.ChannelIOInitialized){return;}w.ChannelIOInitialized=true;var s=document.createElement("script");s.type="text/javascript";s.async=true;s.src="https://cdn.channel.io/plugin/ch-plugin-web.js";var x=document.getElementsByTagName("script")[0];if(x.parentNode){x.parentNode.insertBefore(s,x);}}if(document.readyState==="complete"){l();}else{w.addEventListener("DOMContentLoaded",l);w.addEventListener("load",l);}})();
 
 ChannelIO('boot', {
