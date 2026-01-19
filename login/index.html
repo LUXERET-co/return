@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <title>룩세렛ㅣ통합로그인</title>
+
+  <meta property="og:type" content="website"> 
+  <meta property="og:title" content="룩세렛ㅣ통합로그인">
+  <meta property="og:image" content="https://luxeret.com/assets/image/login-page_preview.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<link rel="apple-touch-icon" sizes="180x180" href="/assets/image/apple-touch-icon.png">
+<link rel="icon" type="image/ico" sizes="32x32" href="/assets/image/favicon.ico">
+<link rel="icon" type="image/ico" sizes="16x16" href="/assets/image/favicon.ico">
+<meta name="msapplication-TileColor" content="#da532c">
+<meta name="theme-color" content="#ffffff">
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <style>
+    body {
+      background:
+        radial-gradient(
+          1200px 600px at 50% -20%,
+          rgba(93,188,234,.08),
+          transparent 60%
+        ),
+        #000;
+      font-family: Pretendard, system-ui, -apple-system;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    ::selection {
+      background: #5dbcea;
+      color: #fff;
+    }
+
+    .login-img-btn {
+      width: 100%;
+      height: 52px;
+      border-radius: .5rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      touch-action: manipulation;
+      transition: transform .1s ease, opacity .1s ease;
+    }
+
+    .login-img-btn:active {
+      transform: scale(.97);
+      opacity: .85;
+    }
+
+    .login-img-btn img {
+      height: 100%;
+      object-fit: contain;
+      pointer-events: none;
+    }
+
+    #statusMsg {
+      animation: pulse 1.6s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: .4; }
+      50% { opacity: 1; }
+    }
+
+    .error-box {
+      background: rgba(255,255,255,.04);
+      border: 1px solid rgba(255,255,255,.08);
+      border-radius: .75rem;
+      padding: 1rem;
+      margin-top: 1.25rem;
+      text-align: center;
+      animation: fadeIn .25s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(4px); }
+      to { opacity: 1; transform: none; }
+    }
+
+    .fade-out {
+      animation: fadeOut .6s ease forwards;
+    }
+
+    @keyframes fadeOut {
+      to { opacity: 0; }
+    }
+  </style>
+</head>
+
+<body class="min-h-screen text-white">
+
+<div id="page" class="flex min-h-screen flex-col md:flex-row">
+
+  <!-- 좌측 브랜딩 -->
+<section
+  class="md:w-1/2 flex items-center justify-center
+         px-8 py-16 pt-48 md:pt-16">
+    <div class="max-w-md">
+      <h1 class="text-4xl font-bold leading-tight mb-6">
+        <span class="text-[#5dbcea]">리턴에</span><br>
+        오신 것을 환영합니다
+      </h1>
+      <p class="text-zinc-400 leading-relaxed">
+        하나의 로그인으로<br>
+        룩세렛의 모든 서비스를<br>
+        바로 이용하실 수 있습니다.
+      </p>
+    </div>
+  </section>
+
+  <!-- 우측 로그인 -->
+  <section
+  class="md:w-1/2 flex items-center justify-center
+         px-6 py-16 pt-20 md:pt-16
+      md:bg-zinc-900/60 md:backdrop-blur">
+    <div class="w-full max-w-sm">
+
+      <!-- PC 전용 제목 -->
+      <h2 class="hidden md:block text-2xl font-semibold text-center mb-8">
+        리턴 로그인
+      </h2>
+
+      <!-- PC 전용 시간 -->
+      <p
+        id="krTime"
+        class="hidden md:block text-zinc-400 text-center text-sm mb-8"
+      ></p>
+
+      <button id="kakaoLoginBtn" class="login-img-btn mb-4">
+        <img
+          src="/assets/image/kakao_login_large_narrow.png"
+          alt="카카오 로그인"
+        >
+      </button>
+
+      <p
+        id="statusMsg"
+        class="text-sm text-zinc-400 text-center hidden"
+      ></p>
+
+      <div id="errorBox" class="error-box hidden">
+        <p class="text-sm text-zinc-300">
+          로그인 중 문제가 발생했습니다.<br>
+          네트워크 상태를 확인 후 다시 시도해주세요.
+        </p>
+      </div>
+
+      <p class="text-xs text-zinc-500 text-center mt-10 leading-relaxed">
+        로그인 시
+        <a
+          href="https://docs.luxeret.com/luxeret/policy/terms"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="font-semibold hover:text-white"
+        >
+          이용약관
+        </a>
+        및
+        <a
+          href="https://docs.luxeret.com/luxeret/policy/privacy"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="font-semibold hover:text-white"
+        >
+          개인정보처리방침
+        </a>
+        에 동의하게 됩니다.
+      </p>
+
+    </div>
+  </section>
+</div>
+
+<script>
+  function updateKoreanTime() {
+    const el = document.getElementById("krTime");
+    if (!el) return;
+
+    el.textContent = new Date().toLocaleString("ko-KR", {
+      timeZone: "Asia/Seoul",
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit"
+    });
+  }
+
+  updateKoreanTime();
+  setInterval(updateKoreanTime, 1000);
+</script>
+
+<script src="https://developers.kakao.com/sdk/js/kakao.js"></script>
+
+<script>
+  const CONFIG = {
+    KAKAO_APP_KEY: "64fcb7de50d868f4162fe3147990e34e",
+    REDIRECT_URI: window.location.origin + "/redirect.html"
+  };
+
+  if (!Kakao.isInitialized()) {
+    Kakao.init(CONFIG.KAKAO_APP_KEY);
+  }
+
+  const btn = document.getElementById("kakaoLoginBtn");
+  const statusMsg = document.getElementById("statusMsg");
+  const errorBox = document.getElementById("errorBox");
+  const page = document.getElementById("page");
+
+  if (localStorage.getItem("kakao_user_info")) {
+    location.href = "/mypage/";
+  }
+
+  let isProcessing = false;
+
+  function handleLogin(e) {
+    if (isProcessing) return;
+    if (e?.cancelable) e.preventDefault();
+
+    isProcessing = true;
+    errorBox.classList.add("hidden");
+    statusMsg.classList.remove("hidden");
+    statusMsg.textContent = "카카오 인증 중...";
+    btn.classList.add("opacity-60");
+
+    try {
+      Kakao.Auth.authorize({
+        redirectUri: CONFIG.REDIRECT_URI,
+        throughTalk: true
+      });
+    } catch {
+      handleError();
+    }
+  }
+
+  function handleError() {
+    isProcessing = false;
+    btn.classList.remove("opacity-60");
+    statusMsg.classList.add("hidden");
+    errorBox.classList.remove("hidden");
+  }
+
+  window.loginSuccess = function () {
+    page.classList.add("fade-out");
+    setTimeout(() => {
+      location.href = "/mypage/";
+    }, 600);
+  };
+
+  btn.addEventListener("click", handleLogin);
+</script>
+
+</body>
+</html>
